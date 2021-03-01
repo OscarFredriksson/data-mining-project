@@ -1,10 +1,14 @@
+import pandas as pd
+
+
 def extract_missing(dataset):
 
     train = []
     missing = []
 
     for index, row in dataset.iterrows():
-        if row["stalk-root"] == "?":
+
+        if row["stalk-root_?"] == 1:
             missing.append(row)
         else:
             train.append(row)
@@ -12,11 +16,25 @@ def extract_missing(dataset):
     return train, missing
 
 
-def split_features_labels(dataset):
+def remove_class_columns(dataset, class_name):
+    ds = dataset.copy()
+
+    for c in class_name:
+        ds.pop(c)
+
+    return ds
+
+
+def split_features_labels(dataset, class_name):
     features = dataset.copy()
 
-    features.pop("class")
+    features = remove_class_columns(features, class_name)
 
-    labels = dataset[["class"]].copy()
+    labels = dataset[class_name].copy()
 
     return features, labels
+
+
+def one_hot_encode(dataset):
+
+    return pd.get_dummies(dataset, columns=dataset.columns)

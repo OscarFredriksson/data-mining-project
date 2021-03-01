@@ -1,11 +1,41 @@
 import pandas as pd
 import tensorflow as tf
 import numpy as np
+import graphviz
+import pydotplus
+
+from IPython.display import Image
+
+
 from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn import tree
+from sklearn.metrics import accuracy_score
+
+
 from matplotlib import pyplot as plt
 import time
 
 import preprocess
+
+
+def get_column_names(dataset):
+    class_columns = [
+        "stalk-root_b",
+        "stalk-root_c",
+        "stalk-root_e",
+        "stalk-root_r",
+        "stalk-root_?",
+    ]
+
+    feature_columns = dataset.columns.tolist()
+
+    for class_column in class_columns:
+        if class_column in feature_columns:
+            feature_columns.remove(class_column)
+
+    return class_columns, feature_columns
+
 
 column_names = [
     "class",
@@ -35,18 +65,69 @@ column_names = [
 
 df = pd.read_csv("mushrooms.csv", names=column_names)
 
+df = preprocess.one_hot_encode(df)
+
+# print(df.columns.tolist())
+
 train, missing = preprocess.extract_missing(df)
 
-train = pd.DataFrame(train, columns=column_names)
-missing = pd.DataFrame(missing, columns=column_names)
+train = pd.DataFrame(train, columns=df.columns.tolist())
+missing = pd.DataFrame(missing, columns=df.columns.tolist())
+
+
+# missing.pop("stalk-root")
+
+# missing_features = preprocess.one_hot_encode(missing)
+
+# train = preprocess.one_hot_encode(train)
 
 # print("TRAIN:")
-# print(train["stalk-root"])
+# print(train.columns)
 
 # print("\nMiSSING:")
 # print(missing["stalk-root"])
 
-train_features, train_labels = preprocess.split_features_labels(train)
+
+class_columns, feature_columns = get_column_names(train)
+
+missing = preprocess.remove_class_columns(missing, class_columns)
+
+train_features, train_labels = preprocess.split_features_labels(train, class_columns)
+
+# train, test = train_test_split(train, test_size=0.0)
+
+# train_features, train_labels = preprocess.split_features_labels(train, class_columns)
+# test_features, test_labels = preprocess.split_features_labels(test, class_columns)
 
 # print(train_features)
 # print(train_labels)
+
+dt = DecisionTreeClassifier(random_state=0, max_depth=5)
+dt.fit(train_features, train_labels)
+
+dt.score(train_features, train_labels)
+
+# predictions = dt.predict(test_features)
+# print(accuracy_score(test_labels, predictions))
+
+predictions = dt.predict(missing)
+print(predictions)
+
+fig = plt.figure(figsize=(25, 20))
+_ = tree.plot_tree(
+    dt, feature_names=feature_columns, class_names=class_columns, filled=True
+)
+fig.savefig("decision_tree.png")
+
+
+# dot_data = export_graphviz(
+#     dt,
+#     out_file=None,
+#     filled=True,
+#     rounded=True,
+#     # feature_names=feature_columns,
+#     class_names=class_columns,
+# )
+
+# graph = pydotplus.graph_from_dot_data(dot_data)
+# Image(graph.create_png())
