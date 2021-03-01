@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 import time
 
-from preprocess import *
+import preprocess
 
 column_names = [
     "class",
@@ -35,13 +35,18 @@ column_names = [
 
 df = pd.read_csv("mushrooms.csv", names=column_names)
 
-train, missing = extract_missing(df)
+train, missing = preprocess.extract_missing(df)
 
 train = pd.DataFrame(train, columns=column_names)
 missing = pd.DataFrame(missing, columns=column_names)
 
-print("TRAIN:")
-print(train["stalk-root"])
+# print("TRAIN:")
+# print(train["stalk-root"])
 
-print("\nMiSSING:")
-print(missing["stalk-root"])
+# print("\nMiSSING:")
+# print(missing["stalk-root"])
+
+train_features, train_labels = preprocess.split_features_labels(train)
+
+# print(train_features)
+# print(train_labels)
