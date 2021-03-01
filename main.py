@@ -5,25 +5,7 @@ from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 import time
 
-
-# def one_hot_encode(dataset):
-#     return pd.get_dummies(dataset, columns=dataset.columns)
-
-
-def extract_missing(dataset):
-
-    train = []
-    missing = []
-
-    for index, row in dataset.iterrows():
-        if row["stalk-root"] == "?":
-            # print("missing")
-            missing.append(row)
-        else:
-            train.append(row)
-
-    return train, missing
-
+from preprocess import *
 
 column_names = [
     "class",
@@ -55,6 +37,11 @@ df = pd.read_csv("mushrooms.csv", names=column_names)
 
 train, missing = extract_missing(df)
 
-print(train)
+train = pd.DataFrame(train, columns=column_names)
+missing = pd.DataFrame(missing, columns=column_names)
 
-print(missing)
+print("TRAIN:")
+print(train["stalk-root"])
+
+print("\nMiSSING:")
+print(missing["stalk-root"])
