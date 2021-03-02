@@ -1,11 +1,9 @@
 import pandas as pd
-import tensorflow as tf
 import numpy as np
 import graphviz
 import pydotplus
 
-from IPython.display import Image
-
+# from IPython.display import Image
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
@@ -18,15 +16,16 @@ import time
 
 import preprocess
 
+class_columns = [
+    "stalk-root_b",
+    "stalk-root_c",
+    "stalk-root_e",
+    "stalk-root_r",
+    "stalk-root_?",
+]
+
 
 def get_column_names(dataset):
-    class_columns = [
-        "stalk-root_b",
-        "stalk-root_c",
-        "stalk-root_e",
-        "stalk-root_r",
-        "stalk-root_?",
-    ]
 
     feature_columns = dataset.columns.tolist()
 
@@ -35,6 +34,18 @@ def get_column_names(dataset):
             feature_columns.remove(class_column)
 
     return class_columns, feature_columns
+
+
+def insert_columns(dataset):
+
+    dt = dataset.copy()
+
+    for column in class_columns:
+        dt.insert(df.columns.get_loc(column), column, float("NaN"))
+
+    print("length: " + str(len(dt.columns.tolist())))
+
+    return dt
 
 
 column_names = [
@@ -65,18 +76,21 @@ column_names = [
 
 df = pd.read_csv("mushrooms.csv", names=column_names)
 
-df = preprocess.one_hot_encode(df)
+df, df_columns = preprocess.one_hot_encode(df)
 
-# print(df.columns.tolist())
+# print(df_columns)
+
+df = pd.DataFrame(df, columns=df_columns)
+
+# print(df)
 
 train, missing = preprocess.extract_missing(df)
 
 train = pd.DataFrame(train, columns=df.columns.tolist())
 missing = pd.DataFrame(missing, columns=df.columns.tolist())
 
-
-# missing.pop("stalk-root")
-
+train = train.reset_index(drop=True)
+missing = missing.reset_index(drop=True)
 # missing_features = preprocess.one_hot_encode(missing)
 
 # train = preprocess.one_hot_encode(train)
@@ -111,14 +125,58 @@ dt.score(train_features, train_labels)
 # print(accuracy_score(test_labels, predictions))
 
 predictions = dt.predict(missing)
-print(predictions)
 
-fig = plt.figure(figsize=(25, 20))
-_ = tree.plot_tree(
-    dt, feature_names=feature_columns, class_names=class_columns, filled=True
-)
-fig.savefig("decision_tree.png")
+predictions = pd.DataFrame(predictions, columns=class_columns)
 
+# print(df.columns.get_loc("stalk-root_?"))
+
+missing_combined = insert_columns(missing)
+
+# print(missing.columns.tolist())
+
+missing_combined = missing_combined.fillna(predictions)
+
+missing_combined = preprocess.one_hot_decode(missing_combined)
+
+missing_combined = pd.DataFrame(missing_combined, columns=column_names)
+
+print(missing_combined)
+
+missing_combined.to_csv("mushrooms-filled-missing.csv", index=False, header=False)
+
+# train_combined = pd.concat([train_features, train_labels], axis=1)
+
+# print(train_combined)
+
+# full_combined = train_combined.append(missing_combined)
+
+# full_combined = preprocess.one_hot_decode(full_combined)
+
+# print(full_combined)
+
+# train = preprocess.one_hot_decode(train)
+
+# train = pd.DataFrame(train, columns=column_names)
+
+
+# print(train_combined)
+
+# fig = plt.figure(figsize=(25, 20))
+# _ = tree.plot_tree(
+#     dt, feature_names=feature_columns, class_names=class_columns, filled=True
+# )
+# fig.savefig("decision_tree.png")
+
+# completed_missing = pd.concat([missing, pd.DataFrame(predictions)], ignore_index=True)
+
+# print(missing.columns.tolist())
+
+
+# for index, row in missing.iterrows():
+#     # for column in class_columns:
+#     print(row[column])
+
+# print(completed_missing)
 
 # dot_data = export_graphviz(
 #     dt,

@@ -1,5 +1,9 @@
 import pandas as pd
 
+from sklearn.preprocessing import OneHotEncoder
+
+ohe = OneHotEncoder()
+
 
 def extract_missing(dataset):
 
@@ -37,4 +41,11 @@ def split_features_labels(dataset, class_name):
 
 def one_hot_encode(dataset):
 
-    return pd.get_dummies(dataset, columns=dataset.columns)
+    ohe.fit(dataset)
+
+    return ohe.transform(dataset).toarray(), ohe.get_feature_names(dataset.columns)
+
+
+def one_hot_decode(dataset):
+
+    return ohe.inverse_transform(dataset)
