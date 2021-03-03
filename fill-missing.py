@@ -17,11 +17,23 @@ import preprocess
 import dataset_utility
 
 
+def get_class_column_names():
+    class_columns = [
+        "stalk-root_b",
+        "stalk-root_c",
+        "stalk-root_e",
+        "stalk-root_r",
+        # "stalk-root_?",
+    ]
+
+    return class_columns
+
+
 def insert_columns(dataset):
 
     dt = dataset.copy()
 
-    for column in dataset_utility.get_class_column_names():
+    for column in get_class_column_names():
         dt.insert(df_enc.columns.get_loc(column), column, float("NaN"))
 
     return dt
@@ -41,7 +53,9 @@ missing = pd.DataFrame(missing, columns=df_enc_columns)
 train = train.reset_index(drop=True)
 missing = missing.reset_index(drop=True)
 
-class_columns, feature_columns = dataset_utility.get_split_column_names(train)
+class_columns, feature_columns = dataset_utility.get_split_column_names(
+    train, get_class_column_names()
+)
 
 missing = preprocess.remove_class_columns(missing, class_columns)
 
@@ -63,15 +77,13 @@ fig = plt.figure(figsize=(25, 20))
 _ = tree.plot_tree(
     dt,
     feature_names=feature_columns,
-    class_names=dataset_utility.get_class_column_names(),
+    class_names=get_class_column_names(),
     filled=True,
 )
 fig.savefig("decision_tree.png")
 
 
-predictions = pd.DataFrame(
-    predictions, columns=dataset_utility.get_class_column_names()
-)
+predictions = pd.DataFrame(predictions, columns=get_class_column_names())
 
 missing_combined = insert_columns(missing)
 

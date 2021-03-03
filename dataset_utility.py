@@ -28,23 +28,9 @@ def get_column_names():
     return column_names
 
 
-def get_class_column_names():
-    class_columns = [
-        "stalk-root_b",
-        "stalk-root_c",
-        "stalk-root_e",
-        "stalk-root_r",
-        # "stalk-root_?",
-    ]
-
-    return class_columns
-
-
-def get_split_column_names(dataset):
+def get_split_column_names(dataset, class_columns):
 
     feature_columns = dataset.columns.tolist()
-
-    class_columns = get_class_column_names()
 
     for class_column in class_columns:
         if class_column in feature_columns:
