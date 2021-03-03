@@ -20,21 +20,21 @@ def extract_missing(dataset):
     return train, missing
 
 
-def remove_class_columns(dataset, class_name):
+def remove_class_columns(dataset, class_names):
     ds = dataset.copy()
 
-    for c in class_name:
+    for c in class_names:
         ds.pop(c)
 
     return ds
 
 
-def split_features_labels(dataset, class_name):
+def split_features_labels(dataset, class_names):
     features = dataset.copy()
 
-    features = remove_class_columns(features, class_name)
+    features = remove_class_columns(features, class_names)
 
-    labels = dataset[class_name].copy()
+    labels = dataset[class_names].copy()
 
     return features, labels
 
