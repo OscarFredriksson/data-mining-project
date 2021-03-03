@@ -1,0 +1,5 @@
+- Cross Validation
+- Naive Bayes
+- Knn
+- Print trees
+- Confusion Matrix
