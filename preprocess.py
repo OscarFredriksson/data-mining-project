@@ -1,8 +1,10 @@
 import pandas as pd
 
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 
 ohe = OneHotEncoder()
+le = LabelEncoder()
 
 
 def extract_missing(dataset):
@@ -47,6 +49,18 @@ def one_hot_encode(dataset):
     return ohe.transform(dataset).toarray(), ohe.get_feature_names(dataset.columns)
 
 
+# Will decode the latest onehotencoded dataset
 def one_hot_decode(dataset):
 
     return ohe.inverse_transform(dataset)
+
+
+def label_encode(dataset):
+    # le.fit(dataset)
+
+    return dataset.apply(le.fit_transform)
+
+
+# Will decode the latest labelencoded dataset
+def label_decode(dataset):
+    return dataset.apply(le.inverse_transform)

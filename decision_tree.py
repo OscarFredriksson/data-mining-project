@@ -21,6 +21,9 @@ def get_class_column_names():
     return class_columns
 
 
+cm_labels = ["edible", "poisonous"]
+
+
 def do_decision_tree(df):
     df_enc, df_enc_columns = preprocess.one_hot_encode(df)
 
@@ -33,6 +36,10 @@ def do_decision_tree(df):
     kf = KFold(n_splits=k_fold_splits, shuffle=True)
 
     accuracies = []
+
+    best_predictions = pd.DataFrame([], columns=get_class_column_names())
+
+    dt = DecisionTreeClassifier(random_state=0, max_depth=4)
 
     for i in range(k_fold_splits):
 
@@ -49,7 +56,6 @@ def do_decision_tree(df):
         test_labels = labels.iloc[result[1]]
 
         # ---Decision Tree----
-        dt = DecisionTreeClassifier(random_state=0, max_depth=4)
         dt.fit(train_features, train_labels)
 
         predictions = dt.predict(test_features)
@@ -58,26 +64,31 @@ def do_decision_tree(df):
 
         accuracies.append(accuracy)
 
-        predictions = pd.DataFrame(predictions, columns=get_class_column_names())
+        if len(accuracies) == 0 or accuracy >= max(accuracies):
+            best_predictions = pd.DataFrame(
+                predictions, columns=get_class_column_names()
+            )
 
-        predictions = predictions.idxmax(axis=1)
-        test_labels = test_labels.idxmax(axis=1)
+    predictions = pd.DataFrame(predictions, columns=get_class_column_names())
 
-        df_cm = pd.DataFrame(
-            metrics.confusion_matrix(
-                predictions, test_labels, labels=get_class_column_names()
-            ),
-            index=get_class_column_names(),
-            columns=get_class_column_names(),
-        )
+    predictions = predictions.idxmax(axis=1)
+    test_labels = test_labels.idxmax(axis=1)
 
-        plt.figure(figsize=(10, 7))
-        sn.heatmap(df_cm, annot=True, fmt="g")
+    df_cm = pd.DataFrame(
+        metrics.confusion_matrix(
+            predictions, test_labels, labels=get_class_column_names()
+        ),
+        index=cm_labels,
+        columns=cm_labels,
+    )
 
-        plt.ylabel("Predicted")
-        plt.xlabel("Actual")
+    plt.figure(figsize=(10, 7))
+    sn.heatmap(df_cm, annot=True, fmt="g")
 
-        plt.savefig("tree-confusion-matrix.png")
+    plt.ylabel("Predicted")
+    plt.xlabel("Actual")
+
+    plt.savefig("decision-tree-cm.png")
 
     print("K-fold results: ", accuracies)
     print("Mean accuracy: ", np.mean(accuracies))
