@@ -30,6 +30,7 @@ def remove_class_columns(dataset, class_names):
 
 
 def split_features_labels(dataset, class_names):
+
     features = dataset.copy()
 
     features = remove_class_columns(features, class_names)

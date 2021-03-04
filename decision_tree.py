@@ -9,6 +9,7 @@ import preprocess
 
 # --sklearn--
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn import tree
 from sklearn import metrics
@@ -25,45 +26,58 @@ def do_decision_tree(df):
 
     df_enc = pd.DataFrame(df_enc, columns=df_enc_columns)
 
-    train, test = train_test_split(df_enc, test_size=0.3)
+    # ---KFold cross validation---
 
-    class_columns, feature_columns = dataset_utility.get_split_column_names(
-        train, get_class_column_names()
-    )
+    k_fold_splits = 5
 
-    train_features, train_labels = preprocess.split_features_labels(
-        train, class_columns
-    )
-    test_features, test_labels = preprocess.split_features_labels(test, class_columns)
+    kf = KFold(n_splits=k_fold_splits, shuffle=True)
 
-    # ---Decision Tree----
-    dt = DecisionTreeClassifier(random_state=0, max_depth=4)
-    dt.fit(train_features, train_labels)
+    accuracies = []
 
-    predictions = dt.predict(test_features)
+    for i in range(k_fold_splits):
 
-    print("Accuracy:", metrics.accuracy_score(predictions, test_labels))
+        class_columns, feature_columns = dataset_utility.get_split_column_names(
+            df, get_class_column_names()
+        )
 
-    predictions = pd.DataFrame(predictions, columns=get_class_column_names())
+        features, labels = preprocess.split_features_labels(df_enc, class_columns)
 
-    predictions = predictions.idxmax(axis=1)
-    test_labels = test_labels.idxmax(axis=1)
+        result = next(kf.split(df_enc), None)
+        train_features = features.iloc[result[0]]
+        test_features = features.iloc[result[1]]
+        train_labels = labels.iloc[result[0]]
+        test_labels = labels.iloc[result[1]]
 
-    # print(predictions)
-    # print(test_labels)
+        # ---Decision Tree----
+        dt = DecisionTreeClassifier(random_state=0, max_depth=4)
+        dt.fit(train_features, train_labels)
 
-    df_cm = pd.DataFrame(
-        metrics.confusion_matrix(
-            predictions, test_labels, labels=get_class_column_names()
-        ),
-        index=get_class_column_names(),
-        columns=get_class_column_names(),
-    )
+        predictions = dt.predict(test_features)
 
-    plt.figure(figsize=(10, 7))
-    sn.heatmap(df_cm, annot=True, fmt="g")
+        accuracy = metrics.accuracy_score(predictions, test_labels)
 
-    plt.ylabel("Predicted")
-    plt.xlabel("Actual")
+        accuracies.append(accuracy)
 
-    plt.savefig("tree-confusion-matrix.png")
+        predictions = pd.DataFrame(predictions, columns=get_class_column_names())
+
+        predictions = predictions.idxmax(axis=1)
+        test_labels = test_labels.idxmax(axis=1)
+
+        df_cm = pd.DataFrame(
+            metrics.confusion_matrix(
+                predictions, test_labels, labels=get_class_column_names()
+            ),
+            index=get_class_column_names(),
+            columns=get_class_column_names(),
+        )
+
+        plt.figure(figsize=(10, 7))
+        sn.heatmap(df_cm, annot=True, fmt="g")
+
+        plt.ylabel("Predicted")
+        plt.xlabel("Actual")
+
+        plt.savefig("tree-confusion-matrix.png")
+
+    print("K-fold results: ", accuracies)
+    print("Mean accuracy: ", np.mean(accuracies))
