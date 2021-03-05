@@ -33,6 +33,7 @@ def do_naive_bayes(df):
     accuracies = []
 
     best_predictions = pd.DataFrame([], columns=class_column)
+    best_test_labels = pd.DataFrame([], columns=class_column)
 
     model = GaussianNB()
 
@@ -55,21 +56,22 @@ def do_naive_bayes(df):
 
         predictions = model.predict(test_features)
 
-        accuracy = metrics.accuracy_score(test_labels, predictions)
+        accuracy = metrics.accuracy_score(predictions, test_labels)
 
         accuracies.append(accuracy)
 
         # print(accuracy > max(accuracies))
         # print(len(accuracies))
 
-        if len(accuracies) == 0 or accuracy >= max(accuracies):
+        if accuracy >= max(accuracies):
             best_predictions = pd.DataFrame(predictions, columns=class_column)
+            best_test_labels = pd.DataFrame(test_labels, columns=class_column)
 
     print("K-fold results: ", accuracies)
     print("Mean accuracy: ", np.mean(accuracies))
 
     df_cm = pd.DataFrame(
-        metrics.confusion_matrix(best_predictions, test_labels, labels=[0, 1]),
+        metrics.confusion_matrix(best_predictions, best_test_labels, labels=[0, 1]),
         index=cm_labels,
         columns=cm_labels,
     )
