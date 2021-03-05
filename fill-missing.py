@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-import graphviz
-import pydotplus
+# import graphviz
+# import pydotplus
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
@@ -23,7 +23,7 @@ def get_class_column_names():
         "stalk-root_c",
         "stalk-root_e",
         "stalk-root_r",
-        # "stalk-root_?",
+        "stalk-root_?",
     ]
 
     return class_columns
@@ -59,7 +59,8 @@ class_columns, feature_columns = dataset_utility.get_split_column_names(
 
 missing = preprocess.remove_class_columns(missing, class_columns)
 
-train_features, train_labels = preprocess.split_features_labels(train, class_columns)
+train_features, train_labels = preprocess.split_features_labels(
+    train, class_columns)
 
 
 dt = DecisionTreeClassifier(random_state=0, max_depth=5)
@@ -96,7 +97,8 @@ full_combined = train.append(missing_combined)
 
 full_combined = preprocess.one_hot_decode(full_combined)
 
-full_combined = pd.DataFrame(full_combined, columns=dataset_utility.get_column_names())
+full_combined = pd.DataFrame(
+    full_combined, columns=dataset_utility.get_column_names())
 
 # print(full_combined.shape)
 # print(df.shape)
