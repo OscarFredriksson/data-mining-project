@@ -24,13 +24,13 @@ def get_class_column_names():
         "stalk-root_c",
         "stalk-root_e",
         "stalk-root_r",
-        # "stalk-root_?",
+        "stalk-root_?",
     ]
 
     return class_columns
 
 
-def insert_columns(dataset):
+def insert_class_columns(dataset):
 
     dt = dataset.copy()
 
@@ -86,11 +86,12 @@ fig.savefig("decision_tree-missing-values.png")
 
 predictions = pd.DataFrame(predictions, columns=get_class_column_names())
 
-missing_combined = insert_columns(missing)
+missing_combined = insert_class_columns(missing)
+
+print(missing_combined["stalk-root_?"])
 
 missing_combined = missing_combined.fillna(predictions)
 
-# print(missing_combined)
 # print(train)
 
 full_combined = train.append(missing_combined)
@@ -99,7 +100,10 @@ full_combined = preprocess.one_hot_decode(full_combined)
 
 full_combined = pd.DataFrame(full_combined, columns=dataset_utility.get_column_names())
 
-# print(full_combined.shape)
-# print(df.shape)
+missing_combined = pd.DataFrame(
+    preprocess.one_hot_decode(missing_combined),
+    columns=dataset_utility.get_column_names(),
+)
 
-full_combined.to_csv("mushrooms-filled-missing.csv", index=False, header=False)
+
+missing_combined.to_csv("mushrooms-filled-missing.csv", index=False, header=False)
