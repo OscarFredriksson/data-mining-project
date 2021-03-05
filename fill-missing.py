@@ -89,7 +89,7 @@ predictions = pd.DataFrame(predictions, columns=get_class_column_names())
 
 missing_combined = insert_class_columns(missing)
 
-print(missing_combined["stalk-root_?"])
+# print(missing_combined["stalk-root_?"])
 
 missing_combined = missing_combined.fillna(predictions)
 
