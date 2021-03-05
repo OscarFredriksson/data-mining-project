@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
-import graphviz
-import pydotplus
+
+# import graphviz
+# import pydotplus
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
@@ -100,10 +101,4 @@ full_combined = preprocess.one_hot_decode(full_combined)
 
 full_combined = pd.DataFrame(full_combined, columns=dataset_utility.get_column_names())
 
-missing_combined = pd.DataFrame(
-    preprocess.one_hot_decode(missing_combined),
-    columns=dataset_utility.get_column_names(),
-)
-
-
-missing_combined.to_csv("mushrooms-filled-missing.csv", index=False, header=False)
+full_combined.to_csv("mushrooms-filled-missing.csv", index=False, header=False)
