@@ -5,6 +5,7 @@ import pydotplus
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_graphviz
+
 from sklearn import tree
 from sklearn.metrics import accuracy_score
 
@@ -62,7 +63,7 @@ missing = preprocess.remove_class_columns(missing, class_columns)
 train_features, train_labels = preprocess.split_features_labels(train, class_columns)
 
 
-dt = DecisionTreeClassifier(random_state=0, max_depth=5)
+dt = DecisionTreeClassifier(random_state=0, max_depth=5, min_samples_leaf=10)
 dt.fit(train_features, train_labels)
 
 dt.score(train_features, train_labels)
@@ -77,10 +78,10 @@ fig = plt.figure(figsize=(25, 20))
 _ = tree.plot_tree(
     dt,
     feature_names=feature_columns,
-    class_names=get_class_column_names(),
+    class_names=class_columns,
     filled=True,
 )
-fig.savefig("decision_tree.png")
+fig.savefig("decision_tree-missing-values.png")
 
 
 predictions = pd.DataFrame(predictions, columns=get_class_column_names())

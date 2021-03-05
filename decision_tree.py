@@ -40,15 +40,15 @@ def do_decision_tree(df):
     best_predictions = pd.DataFrame([], columns=get_class_column_names())
     best_test_labels = pd.DataFrame([], columns=get_class_column_names())
 
-    dt = DecisionTreeClassifier(random_state=0, max_depth=4)
+    dt = DecisionTreeClassifier(random_state=0, max_depth=4, min_samples_leaf=5)
+
+    class_columns, feature_columns = dataset_utility.get_split_column_names(
+        df_enc, get_class_column_names()
+    )
+
+    features, labels = preprocess.split_features_labels(df_enc, class_columns)
 
     for i in range(k_fold_splits):
-
-        class_columns, feature_columns = dataset_utility.get_split_column_names(
-            df, get_class_column_names()
-        )
-
-        features, labels = preprocess.split_features_labels(df_enc, class_columns)
 
         result = next(kf.split(df_enc), None)
         train_features = features.iloc[result[0]]
@@ -96,3 +96,13 @@ def do_decision_tree(df):
 
     print("K-fold results: ", accuracies)
     print("Mean accuracy: ", np.mean(accuracies))
+
+    fig = plt.figure(figsize=(25, 20))
+    _ = tree.plot_tree(
+        dt,
+        feature_names=feature_columns,
+        class_names=class_columns,
+        filled=True,
+        rounded=True,
+    )
+    fig.savefig("decision_tree.png")
