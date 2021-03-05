@@ -89,8 +89,8 @@ def do_decision_tree(df):
     plt.figure(figsize=(10, 7))
     sn.heatmap(df_cm, annot=True, fmt="g")
 
-    plt.ylabel("Predicted")
-    plt.xlabel("Actual")
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
 
     plt.savefig("decision-tree-cm.png")
 
